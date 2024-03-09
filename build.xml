@@ -1,4 +1,4 @@
-<project name="Tetris" default="package">
+<project name="Maze" default="package">
 	<!-- version 7.1 -->
 
 	<tstamp/>
