@@ -113,6 +113,7 @@ function love.update( dt )
 		end
 		if newRoom then
 			print( "Found the end!" )
+			love.event.quit()
 		end
 	end
 end

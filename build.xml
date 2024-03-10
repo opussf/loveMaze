@@ -66,6 +66,12 @@
 		<include name="README.md"/>
 	</patternset>
 
+	<patternset id="supportFiles">
+		<include name="src/*.wav"/>
+		<include name="src/*.jpg"/>
+		<include name="src/*.maze"/>
+	</patternset>
+
 	<patternset id="resultFiles">
 		<include name="testOut.xml"/>
 		<include name="coverage.xml"/>
@@ -96,8 +102,9 @@
 			</fileset>
 		</copy>
 		<copy   todir="${package.dir}" filtering="false" flatten="true">
-			<fileset dir="src" includes="*.wav"/>
-			<fileset dir="src" includes="*.jpg"/>
+			<fileset dir=".">
+				<patternset refid="supportFiles"/>
+			</fileset>
 		</copy>
 		<zip 	destfile="${target.dir}/${project.love}"
 				basedir="${working.dir}/${ant.project.name}"
