@@ -37,7 +37,7 @@ function love.load()
 		{width/6.0-((width/6)/2.5), height/6.0-((height/6)/2.5)},
 	}
 
-	loadMaze(1)
+	loadMaze(2)
 	setupPlayer()
 
 	for i, coords in ipairs( roomEdges ) do
@@ -157,20 +157,40 @@ end
 function loadMaze( id )
 	fileName = string.format( "%03i.maze", id )
 	fileInfo = love.filesystem.getInfo( fileName )
+	fileIn = {}
 	if fileInfo then
 		for line in love.filesystem.lines( fileName ) do
-
+			table.insert( fileIn, line )
 		end
 	end
-	maze.dimension = { 3, 3, 1 }
-	maze.start = { 2, 2, 1 }
-	maze.finish = { 3, 1, 1 }
+	_3csv = "^(%d+),(%d+)[,]*(%d*)$"
 
+	_, _, x,y,z = string.find( fileIn[1], _3csv )   -- maze.dimension = line 1
+	maze.dimension = { tonumber(x), tonumber(y), z=="" and 1 or tonumber(z) }
+
+	_, _, x,y,z = string.find( fileIn[2], _3csv )   -- maze.start = line 2
+	maze.start = { tonumber(x), tonumber(y), z=="" and 1 or tonumber(z) }
+
+	_, _, x,y,z = string.find( fileIn[3], _3csv )   -- maze.finish = line 3
+	maze.finish = { tonumber(x), tonumber(y), z=="" and 1 or tonumber(z) }
+
+	-- line 4 should be blank
 	maze.maze = {}
-	maze.maze[1] = {}  -- z
-	maze.maze[1][1] = {09,05,07} -- y
-	maze.maze[1][2] = {10,13,03}
-	maze.maze[1][3] = {12,05,06}
+
+	for z = 1,maze.dimension[3] do
+		-- print( "z="..z )
+		maze.maze[z] = {}
+		for y = 1,maze.dimension[2] do
+			-- print( "y="..y )
+			maze.maze[z][y] = {}
+			lineNum = ((z-1)*maze.dimension[2])+y + 4
+			-- print( "line#="..lineNum )
+			for v in string.gmatch( fileIn[lineNum], "([^,]+)" ) do
+				table.insert( maze.maze[z][y], tonumber(v) )
+				-- print(v)
+			end
+		end
+	end
 end
 
 function setupPlayer()
