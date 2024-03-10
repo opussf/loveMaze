@@ -1,3 +1,5 @@
+require "bit"
+
 local width, height = 0,0
 local centerX, centerY = 0,0
 local maze = {}
@@ -35,15 +37,42 @@ function love.load()
 end
 
 function love.draw()
-	drawCurrent = player.current
+	drawCurrent = {}
+	for i, v in ipairs( player.current ) do
+		drawCurrent[i] = v
+	end
 	local drawRooms = true
+	local depth = 1
 	while drawRooms do
 		local x,y,z = unpack( drawCurrent )
 		local currentRoom = maze.maze[z][y][x]
 		print( x, y, z, currentRoom )
+		drawCeiling( depth )
+		drawFloor( depth )
+		if player.facing == "east" then
+			-- left = north
+			if bit.band( currentRoom, 1 ) ~= 0 then
+				drawLeft( depth )
+			end
+			-- right = south
+			if bit.band( currentRoom, 4 ) ~= 0 then
+				drawRight( depth )
+			end
+			if bit.band( currentRoom, 2 ) ~= 0 then
+				drawFront( depth )
+				drawRooms = false
+				print( "setFalse" )
+			end
+		end
+		if drawRooms then
+			for i,v in ipairs( directionVectors[player.facing] ) do
+				drawCurrent[i] = drawCurrent[i] + v
+			end
+			depth = depth + 1
+		end
 
 
-		drawRooms = false
+		if depth >= #roomEdges then drawRooms = false end
 	end
 
 
@@ -117,5 +146,5 @@ end
 
 function setupPlayer()
 	player.current = maze.start
-	player.facing = "west"
+	player.facing = "east"
 end
