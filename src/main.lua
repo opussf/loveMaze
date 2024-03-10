@@ -15,13 +15,13 @@ local directionVectors = {
 	["up"] = {0,0,-1},
 	["down"] = {0,0,1}
 }
-local directionWallBits = {  -- left, right, top, bottom, front
-	["north"] = {8, 2, 16, 32, 1},
-	["east"] = {1, 4, 16, 32, 2},
-	["south"] = {2, 8, 16, 32, 4},
-	["west"] = {4, 1, 16, 32, 8},
-	["up"] = { },  -- OI!
-	["down"] = {}
+local directionWallBits = {  -- front, back, left, right, top, bottom
+	["north"] = {1, 4, 8, 2, 16, 32},
+	["east"] = {2, 8, 1, 4, 16, 32},
+	["south"] = {4, 1, 2, 8, 16, 32},
+	["west"] = {8, 2, 4, 1, 16, 32},
+	-- ["up"] = { },  -- OI!
+	-- ["down"] = {}
 }
 
 function love.load()
@@ -58,13 +58,13 @@ function love.draw()
 		drawCeiling( depth )
 		drawFloor( depth )
 		wallBits = directionWallBits[player.facing]
-		if bit.band( currentRoom, wallBits[1] ) ~= 0 then
+		if bit.band( currentRoom, wallBits[3] ) ~= 0 then
 			drawLeft( depth )
 		end
-		if bit.band( currentRoom, wallBits[2] ) ~= 0 then
+		if bit.band( currentRoom, wallBits[4] ) ~= 0 then
 			drawRight( depth )
 		end
-		if bit.band( currentRoom, wallBits[5] ) ~= 0 then
+		if bit.band( currentRoom, wallBits[1] ) ~= 0 then
 			drawFront( depth )
 			drawRooms = false
 		end
@@ -78,6 +78,27 @@ function love.draw()
 
 		if depth >= #roomEdges then drawRooms = false end
 	end
+end
+function love.keypressed( key, scancode, isrepeat )
+	print( key, scancode, isrepeat )
+	if key == "left" then
+		newFront = directionWallBits[player.facing][3]
+	elseif key == "right" then
+		newFront = directionWallBits[player.facing][4]
+	end
+	if newFront then
+		for d, dirs in pairs( directionWallBits ) do
+			if newFront == dirs[1] then
+				player.facing = d
+			end
+		end
+	end
+	if key == "up" then
+		for i,v in ipairs( directionVectors[player.facing] ) do
+			player.current[i] = player.current[i] + v
+		end
+	end
+	print( newFront, player.facing )
 
 end
 function drawCeiling( depth )
