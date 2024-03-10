@@ -15,6 +15,14 @@ local directionVectors = {
 	["up"] = {0,0,-1},
 	["down"] = {0,0,1}
 }
+local directionWallBits = {  -- left, right, top, bottom, front
+	["north"] = {8, 2, 16, 32, 1},
+	["east"] = {1, 4, 16, 32, 2},
+	["south"] = {2, 8, 16, 32, 4},
+	["west"] = {4, 1, 16, 32, 8},
+	["up"] = { },  -- OI!
+	["down"] = {}
+}
 
 function love.load()
 	width, height = love.graphics.getDimensions()
@@ -49,21 +57,18 @@ function love.draw()
 		print( x, y, z, currentRoom )
 		drawCeiling( depth )
 		drawFloor( depth )
-		if player.facing == "east" then
-			-- left = north
-			if bit.band( currentRoom, 1 ) ~= 0 then
-				drawLeft( depth )
-			end
-			-- right = south
-			if bit.band( currentRoom, 4 ) ~= 0 then
-				drawRight( depth )
-			end
-			if bit.band( currentRoom, 2 ) ~= 0 then
-				drawFront( depth )
-				drawRooms = false
-				print( "setFalse" )
-			end
+		wallBits = directionWallBits[player.facing]
+		if bit.band( currentRoom, wallBits[1] ) ~= 0 then
+			drawLeft( depth )
 		end
+		if bit.band( currentRoom, wallBits[2] ) ~= 0 then
+			drawRight( depth )
+		end
+		if bit.band( currentRoom, wallBits[5] ) ~= 0 then
+			drawFront( depth )
+			drawRooms = false
+		end
+
 		if drawRooms then
 			for i,v in ipairs( directionVectors[player.facing] ) do
 				drawCurrent[i] = drawCurrent[i] + v
@@ -71,20 +76,8 @@ function love.draw()
 			depth = depth + 1
 		end
 
-
 		if depth >= #roomEdges then drawRooms = false end
 	end
-
-
-
-
-	-- for i=2,#roomEdges do
-	-- 	drawCeiling( i )
-	-- 	drawFloor( i )
-	-- 	drawLeft( i )
-	-- 	drawRight( i )
-	-- end
-	-- drawFront( #roomEdges )
 
 end
 function drawCeiling( depth )
