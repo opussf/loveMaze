@@ -23,6 +23,7 @@ local directionWallBits = {  -- front, back, left, right, top, bottom
 	-- ["up"] = { },  -- OI!
 	-- ["down"] = {}
 }
+local newRoom = false
 
 function love.load()
 	width, height = love.graphics.getDimensions()
@@ -54,7 +55,7 @@ function love.draw()
 	while drawRooms do
 		local x,y,z = unpack( drawCurrent )
 		local currentRoom = maze.maze[z][y][x]
-		print( x, y, z, currentRoom )
+		--print( x, y, z, currentRoom )
 		drawCeiling( depth )
 		drawFloor( depth )
 		wallBits = directionWallBits[player.facing]
@@ -80,7 +81,7 @@ function love.draw()
 	end
 end
 function love.keypressed( key, scancode, isrepeat )
-	print( key, scancode, isrepeat )
+	local newFront
 	if key == "left" then
 		newFront = directionWallBits[player.facing][3]
 	elseif key == "right" then
@@ -94,12 +95,26 @@ function love.keypressed( key, scancode, isrepeat )
 		end
 	end
 	if key == "up" then
-		for i,v in ipairs( directionVectors[player.facing] ) do
-			player.current[i] = player.current[i] + v
+		-- print( directionWallBits[player.facing][1], maze.maze[player.current[3]][player.current[2]][player.current[1]],
+		-- 	bit.band( directionWallBits[player.facing][1], maze.maze[player.current[3]][player.current[2]][player.current[1]] ) )
+		if bit.band( directionWallBits[player.facing][1], maze.maze[player.current[3]][player.current[2]][player.current[1]] ) == 0 then
+			for i,v in ipairs( directionVectors[player.facing] ) do
+				player.current[i] = player.current[i] + v
+			end
+			newRoom = true
 		end
 	end
-	print( newFront, player.facing )
-
+	-- print( newFront, player.facing, "---------" )
+end
+function love.update( dt )
+	if newRoom then
+		for i, v in ipairs( player.current ) do
+			newRoom = newRoom and (player.current[i] == maze.finish[i])
+		end
+		if newRoom then
+			print( "Found the end!" )
+		end
+	end
 end
 function drawCeiling( depth )
 	edgeCoords = { centerX-roomEdges[depth][1],centerY-roomEdges[depth][2], centerX+roomEdges[depth][1],centerY-roomEdges[depth][2],
