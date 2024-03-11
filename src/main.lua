@@ -1,5 +1,8 @@
 require "bit"
 
+print( #arg )
+print( arg[1], arg[2] )
+
 local width, height = 0,0
 local centerX, centerY = 0,0
 local maze = {}
@@ -37,7 +40,7 @@ function love.load()
 		{width/6.0-((width/6)/2.5), height/6.0-((height/6)/2.5)},
 	}
 
-	loadMaze(3)
+	loadMaze(4)
 	setupPlayer()
 
 	for i, coords in ipairs( roomEdges ) do
