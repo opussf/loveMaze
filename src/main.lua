@@ -61,9 +61,85 @@ function love.draw()
 		wallBits = directionWallBits[player.facing]
 		if bit.band( currentRoom, wallBits[3] ) ~= 0 then
 			drawLeft( depth )
+		else
+			-- print( "Empty left wall" )
+			roomToTheDirection = wallBits[3]
+			-- get east from 2
+			for d,dirs in pairs( directionWallBits ) do
+				if roomToTheDirection == dirs[1] then
+					side = {}
+					for i, v in ipairs( directionVectors[d] ) do
+						side[i] = player.current[i] + v
+					end
+				end
+			end
+			-- get room to the d dir
+			sideRoom = maze.maze[side[3]][side[2]][side[1]]
+			-- ceiling
+			love.graphics.setColor( ceilingColor )
+			edgeCoords = { centerX-roomEdges[depth][1],centerY-roomEdges[depth][2], centerX-roomEdges[depth+1][1],centerY-roomEdges[depth+1][2],
+							centerX-roomEdges[depth][1],centerY-roomEdges[depth+1][2] }
+			love.graphics.polygon( "fill", edgeCoords )
+			love.graphics.setColor( 1, 1, 1, 1 )
+			love.graphics.polygon( "line", edgeCoords )
+			-- floor
+			love.graphics.setColor( floorColor )
+			edgeCoords = { centerX-roomEdges[depth][1],centerY+roomEdges[depth+1][2], centerX-roomEdges[depth+1][1],centerY+roomEdges[depth+1][2],
+							centerX-roomEdges[depth][1],centerY+roomEdges[depth][2] }
+			love.graphics.polygon( "fill", edgeCoords )
+			love.graphics.setColor( 1, 1, 1, 1 )
+			love.graphics.polygon( "line", edgeCoords )
+			-- wall (only 1)
+			if bit.band( sideRoom, wallBits[1] ) ~= 0 then
+				love.graphics.setColor( wallColor )
+				edgeCoords = { centerX-roomEdges[depth][1],centerY-roomEdges[depth+1][2], centerX-roomEdges[depth+1][1],centerY-roomEdges[depth+1][2],
+								centerX-roomEdges[depth+1][1],centerY+roomEdges[depth+1][2], centerX-roomEdges[depth][1],centerY+roomEdges[depth+1][2] }
+				love.graphics.polygon( "fill", edgeCoords )
+				love.graphics.setColor( 1, 1, 1, 1 )
+				love.graphics.polygon( "line", edgeCoords )
+			end
+
+			-- print( player.facing, roomToTheDirection, directionWallBits[player.facing], sideRoom )
 		end
 		if bit.band( currentRoom, wallBits[4] ) ~= 0 then
 			drawRight( depth )
+		else
+			-- print( "Empty right wall" )
+			roomToTheDirection = wallBits[4]
+			for d,dirs in pairs( directionWallBits ) do
+				if roomToTheDirection == dirs[1] then
+					side = {}
+					for i, v in ipairs( directionVectors[d] ) do
+						side[i] = player.current[i] + v
+					end
+				end
+			end
+			sideRoom = maze.maze[side[3]][side[2]][side[1]]
+			-- ceiling
+			love.graphics.setColor( ceilingColor )
+			edgeCoords = { centerX+roomEdges[depth][1],centerY-roomEdges[depth][2], centerX+roomEdges[depth][1],centerY-roomEdges[depth+1][2],
+							centerX+roomEdges[depth+1][1],centerY-roomEdges[depth+1][2] }
+			love.graphics.polygon( "fill", edgeCoords )
+			love.graphics.setColor( 1, 1, 1, 1 )
+			love.graphics.polygon( "line", edgeCoords )
+			-- floor
+			love.graphics.setColor( floorColor )
+			edgeCoords = { centerX+roomEdges[depth][1],centerY+roomEdges[depth][2], centerX+roomEdges[depth][1],centerY+roomEdges[depth+1][2],
+							centerX+roomEdges[depth+1][1],centerY+roomEdges[depth+1][2] }
+			love.graphics.polygon( "fill", edgeCoords )
+			love.graphics.setColor( 1, 1, 1, 1 )
+			love.graphics.polygon( "line", edgeCoords )
+			if bit.band( sideRoom, wallBits[1] ) ~= 0 then
+				love.graphics.setColor( wallColor )
+				edgeCoords = { centerX+roomEdges[depth+1][1],centerY-roomEdges[depth+1][2], centerX+roomEdges[depth][1],centerY-roomEdges[depth+1][2],
+								centerX+roomEdges[depth][1],centerY+roomEdges[depth+1][2], centerX+roomEdges[depth+1][1],centerY+roomEdges[depth+1][2] }
+				love.graphics.polygon( "fill", edgeCoords )
+				love.graphics.setColor( 1, 1, 1, 1 )
+				love.graphics.polygon( "line", edgeCoords )
+			end
+
+
+			-- print( player.facing, roomToTheDirection, directionWallBits[player.facing], sideRoom )
 		end
 		if bit.band( currentRoom, wallBits[1] ) ~= 0 then
 			drawFront( depth )
@@ -104,7 +180,7 @@ function love.keypressed( key, scancode, isrepeat )
 			newRoom = true
 		end
 	end
-	-- print( newFront, player.facing, "---------" )
+	print( newFront, player.facing, unpack( player.current ) )
 end
 function love.update( dt )
 	if newRoom then
